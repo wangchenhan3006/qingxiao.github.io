@@ -103,26 +103,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Unity笔记-泛型单例</title>
-    <url>/2023/12/04/Unity%E7%AC%94%E8%AE%B0-%E6%B3%9B%E5%9E%8B%E5%8D%95%E4%BE%8B/</url>
-    <content><![CDATA[<h1 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h1><p>一个类只有一个对象（实例）叫做单例模式。适用于管理类。</p>
-<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*unity单例模式：</span></span><br><span class="line"><span class="comment">只能将单例脚本挂载到一个对象上，且一个对象只能有一个此单例脚本。</span></span><br><span class="line"><span class="comment">优点：单例模式的脚本只能有一个对象，使用对象方便。</span></span><br><span class="line"><span class="comment">一般要给外界提供一个访问变量，让外界来访问唯一的该类所生成的对象。</span></span><br><span class="line"><span class="comment">只希望外界访问，不希望外界修改（因为管理器一般自主控制，修改变量），所以使用private关键字。*/</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> ClassName instance;</span><br><span class="line"><span class="comment">//不提供set，只提供get访问。</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ClassName Instance&#123;</span><br><span class="line">	<span class="keyword">get</span>&#123;</span><br><span class="line">	   <span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 防止出现null异常，在Awake()里添加逻辑：</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Awake</span>()</span>&#123;</span><br><span class="line">instance = <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 对于外界访问instance,使用如下逻辑：</span></span><br><span class="line">ClassName obj = ClassName.Instance;</span><br></pre></td></tr></table></figure>
-<p>对于使用多个单例的场景，可以使用泛型单例基类</p>
-<h1 id="泛型单例基类"><a href="#泛型单例基类" class="headerlink" title="泛型单例基类"></a>泛型单例基类</h1><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">ClassName</span>&lt;<span class="title">T</span>&gt; : <span class="title">MonoBehaviour</span> <span class="keyword">where</span> <span class="title">T</span> : <span class="title">MonoBehaviour</span><span class="comment">//定义泛型 具体类型由传入的类型决定 限制T为MonoBehaviour或它的子类</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> T instance;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> T Instance&#123;</span><br><span class="line"><span class="keyword">get</span>&#123;</span><br><span class="line"><span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Awake</span>()</span>&#123;</span><br><span class="line">instance = <span class="keyword">this</span> <span class="keyword">as</span> T;<span class="comment">//类型转换 把this转换为T类型的对象</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">OnDestory</span>()</span>&#123;</span><br><span class="line">instance = <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="基类继承"><a href="#基类继承" class="headerlink" title="基类继承"></a>基类继承</h2><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">ClassName1</span> : <span class="title">ClassName</span>&lt;<span class="title">ClassName1</span>&gt;&#123;</span><br><span class="line"><span class="comment">//直接继承ClassName类里的所有方法 无需多写，该类即为单例类</span></span><br><span class="line"><span class="comment">//ClassName1传入了ClassName1类型给T，因此，之前用T类型的变量在继承的ClassName1里都变成了ClassName1类型</span></span><br><span class="line"><span class="comment">//(Tip:传类型给T不影响基类)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="访问单例类"><a href="#访问单例类" class="headerlink" title="访问单例类"></a>访问单例类</h1><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">Test</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span> ClassName c1=<span class="literal">null</span>;</span><br><span class="line"><span class="keyword">public</span> ClassName1 c2=<span class="literal">null</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Start</span>()</span>&#123;</span><br><span class="line">c1 = ClassName.Instance;</span><br><span class="line">c2 = ClassName1.Instance;</span><br><span class="line">&#123;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Update</span>()</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>#普通csharp类实现单例</p>
-<figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">Test1</span>&#123;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Test1 instance;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Test1 Instance&#123;</span><br><span class="line"><span class="keyword">get</span>&#123;</span><br><span class="line"><span class="keyword">if</span>(instance == <span class="literal">null</span>)&#123;<span class="comment">//判断是否为空</span></span><br><span class="line">instance = <span class="keyword">new</span> Test1();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Unity课程链接：<a href="https://study.163.com/course/courseMain.htm?courseId=1212756805">https://study.163.com/course/courseMain.htm?courseId=1212756805</a></p>
-]]></content>
-      <categories>
-        <category>Unity</category>
-      </categories>
-      <tags>
-        <tag>C#</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Unity笔记-UI框架</title>
     <url>/2023/12/08/Unity%E7%AC%94%E8%AE%B0-UI%E6%A1%86%E6%9E%B6/</url>
     <content><![CDATA[<p><img src="https://z1.ax1x.com/2023/12/08/pi2Q1v6.png" alt="pi2Q1v6.png"><br>这是一个普通的消息框架<br>其中，UIManager与其他分支不同。如NPCManager和Enemy只有一些功能，而UI在制作游戏时通常会有十几个功能（如血条，技能，背包，页面等）。且页面之间要相互切换。<br>所以，UI框架诞生了。</p>
@@ -246,51 +226,6 @@ void CloseController()&#123;
       </tags>
   </entry>
   <entry>
-    <title>npm博客自建图床</title>
-    <url>/2024/03/16/npm%E8%87%AA%E5%BB%BA%E5%9B%BE%E5%BA%8A/</url>
-    <content><![CDATA[<p>**参考教程：<a href="https://blog.xxfer.cn/posts/a008ab16.html">npm 自建免费图床方案</a></p>
-<h1 id="Npm图床"><a href="#Npm图床" class="headerlink" title="Npm图床"></a>Npm图床</h1><p>Tips:此图床使用时可能不稳定</p>
-<h2 id="搭建教程"><a href="#搭建教程" class="headerlink" title="搭建教程"></a>搭建教程</h2><h3 id="1-注册npm账户"><a href="#1-注册npm账户" class="headerlink" title="1.注册npm账户"></a>1.注册npm账户</h3><ul>
-<li>进入<a href="https://npmjs.com/">npm官网</a>，注册一个账号。</li>
-<li>注册完进入主页，点击右上角头像，再点击 Access Token<br><img src="https://www.freeimg.cn/i/2024/03/17/65f64c6a5b313.png" alt="主页"></li>
-<li>然后点击 Generate New Token，选择 Classic Token。在页面里随意填写一个名字，勾选 Automation，点击 Generate Token 生成令牌。<br><img src="https://www.freeimg.cn/i/2024/03/17/65f64ccf7557e.png" alt="令牌"></li>
-</ul>
-<p><strong>一定要将生成后的令牌保存好，令牌只显示一次。</strong></p>
-<h3 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h3><ul>
-<li>首先注册一个Github账号（登不上用加速器）</li>
-<li>进入<a href="https://github.com/">Github主页</a>创建一个新仓库，名字，权限随意</li>
-<li><strong>进入仓库</strong>，选择 Settings，选择 Secrets and variables中的 Actions(<strong>是仓库里的Settings，不是主页的Settings！</strong>)<br><img src="https://www.freeimg.cn/i/2024/03/17/65f6531700da3.png" alt="Actions"></li>
-<li>点击 New repository secret 添加一个新的 Secret<br><img src="https://gcore.jsdelivr.net/npm/xxfer-pic@1.0.2/a008ab16/secret2.png" alt="Secret"></li>
-<li>Name 填写 NPM_TOKEN，Secret 填写前面获取的 npm 令牌</li>
-<li>然后再仓库<strong>根目录</strong>新建package.json:<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">name 必须要小写</span><br><span class="line">version 随意</span><br><span class="line"></span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你的npm包名称（随意）&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;版本，建议1.0.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;包描述&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;author&quot;</span><span class="punctuation">:</span> <span class="string">&quot;作者&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-<img src="https://www.freeimg.cn/i/2024/03/17/65f6542cd37e7.png" alt="package.json"><h3 id="克隆仓库"><a href="#克隆仓库" class="headerlink" title="克隆仓库"></a>克隆仓库</h3></li>
-<li>打开终端或git终端，把你的仓库克隆</li>
-<li>在你的github新仓库点击<strong>绿色按钮code</strong>，点击SSH：<br><img src="https://www.freeimg.cn/i/2024/03/17/65f654af556e9.png" alt="clone"></li>
-<li>把显示的代码拷贝下来(显示的代码一般为<a href="mailto:&#103;&#x69;&#x74;&#x40;&#x67;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#x63;&#x6f;&#x6d;">&#103;&#x69;&#x74;&#x40;&#x67;&#105;&#x74;&#x68;&#117;&#98;&#x2e;&#x63;&#x6f;&#x6d;</a>:你的用户名/仓库名称.git)，打开终端或git 终端，输入以下代码：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> [你拷贝下来的东西]</span><br></pre></td></tr></table></figure></li>
-<li>等待拷贝完成。</li>
-<li>在 clone 下来的文件夹内打开终端，输入以下指令切换回原生源<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> registry https://registry.npmjs.org</span><br></pre></td></tr></table></figure></li>
-<li>添加本地 npm 用户设置<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 仅第一次使用需要添加用户，之后会提示你输入你的npm账号密码以及注册邮箱</span></span><br><span class="line">npm adduser</span><br><span class="line"><span class="comment"># 非第一次使用直接登录即可，之后会提示你输入你的npm账号密码以及注册邮箱</span></span><br><span class="line">npm login</span><br></pre></td></tr></table></figure>
-运行npm初始化指令（npm init）<strong>注意，请确认你的包名没有和他人重复,可以在 npm 官网搜索相应包名，搜不到就说明还没被占用。</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm init</span><br></pre></td></tr></table></figure></li>
-<li>接着按照指示填写：<br>运行后出现package name:填写你的包名</li>
-<li>version:填写(1.0.0)</li>
-<li>description:填写描述，不填也行</li>
-<li>entry point:默认</li>
-<li>test command:默认</li>
-<li>git repository:github图床仓库地址，不填也行</li>
-<li>keywords:关键字，不填也行</li>
-<li>author:作者</li>
-<li>license:默认<br>最后会输出一段package.json，然后会显示Is this OK？（yes）输入yes，结束。<br>最后输入发布指令，把包发布到npm上：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm publish</span><br></pre></td></tr></table></figure>
-<h3 id="如何访问图片"><a href="#如何访问图片" class="headerlink" title="如何访问图片"></a>如何访问图片</h3>例如：在仓库里新建一个image文件夹，里面放置图片，那么访问链接为：<br><a href="https://gcore.jsdelivr.net/npm/[%E5%8C%85%E5%90%8D]/image/xxx.png">https://gcore.jsdelivr.net/npm/[包名]/image/xxx.png</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Hexo</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Unity笔记-状态机</title>
     <url>/2023/12/06/Unity%E7%AC%94%E8%AE%B0-%E7%8A%B6%E6%80%81%E6%9C%BA/</url>
     <content><![CDATA[<h1 id="有限状态机-FSM"><a href="#有限状态机-FSM" class="headerlink" title="有限状态机(FSM)"></a>有限状态机(FSM)</h1><p>有限状态：状态持续时长有限（例：人物有很多状态，如跑步，攻击，游泳。这些状态需进行切换，不可能无限进行一个状态,如人物不可能一直保持攻击状态，<br>不进行跑步，游泳）<br>切换这些状态的东西叫做状态机。<br>举例：下面是一个角色相关脚本</p>
@@ -328,6 +263,51 @@ void CloseController()&#123;
       </categories>
       <tags>
         <tag>建站</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>npm博客自建图床</title>
+    <url>/2024/03/16/npm%E8%87%AA%E5%BB%BA%E5%9B%BE%E5%BA%8A/</url>
+    <content><![CDATA[<p>**参考教程：<a href="https://blog.xxfer.cn/posts/a008ab16.html">npm 自建免费图床方案</a></p>
+<h1 id="Npm图床"><a href="#Npm图床" class="headerlink" title="Npm图床"></a>Npm图床</h1><p>Tips:此图床使用时可能不稳定</p>
+<h2 id="搭建教程"><a href="#搭建教程" class="headerlink" title="搭建教程"></a>搭建教程</h2><h3 id="1-注册npm账户"><a href="#1-注册npm账户" class="headerlink" title="1.注册npm账户"></a>1.注册npm账户</h3><ul>
+<li>进入<a href="https://npmjs.com/">npm官网</a>，注册一个账号。</li>
+<li>注册完进入主页，点击右上角头像，再点击 Access Token<br><img src="https://www.freeimg.cn/i/2024/03/17/65f64c6a5b313.png" alt="主页"></li>
+<li>然后点击 Generate New Token，选择 Classic Token。在页面里随意填写一个名字，勾选 Automation，点击 Generate Token 生成令牌。<br><img src="https://www.freeimg.cn/i/2024/03/17/65f64ccf7557e.png" alt="令牌"></li>
+</ul>
+<p><strong>一定要将生成后的令牌保存好，令牌只显示一次。</strong></p>
+<h3 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h3><ul>
+<li>首先注册一个Github账号（登不上用加速器）</li>
+<li>进入<a href="https://github.com/">Github主页</a>创建一个新仓库，名字，权限随意</li>
+<li><strong>进入仓库</strong>，选择 Settings，选择 Secrets and variables中的 Actions(<strong>是仓库里的Settings，不是主页的Settings！</strong>)<br><img src="https://www.freeimg.cn/i/2024/03/17/65f6531700da3.png" alt="Actions"></li>
+<li>点击 New repository secret 添加一个新的 Secret<br><img src="https://gcore.jsdelivr.net/npm/xxfer-pic@1.0.2/a008ab16/secret2.png" alt="Secret"></li>
+<li>Name 填写 NPM_TOKEN，Secret 填写前面获取的 npm 令牌</li>
+<li>然后再仓库<strong>根目录</strong>新建package.json:<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">name 必须要小写</span><br><span class="line">version 随意</span><br><span class="line"></span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你的npm包名称（随意）&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;版本，建议1.0.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;包描述&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;author&quot;</span><span class="punctuation">:</span> <span class="string">&quot;作者&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<img src="https://www.freeimg.cn/i/2024/03/17/65f6542cd37e7.png" alt="package.json"><h3 id="克隆仓库"><a href="#克隆仓库" class="headerlink" title="克隆仓库"></a>克隆仓库</h3></li>
+<li>打开终端或git终端，把你的仓库克隆</li>
+<li>在你的github新仓库点击<strong>绿色按钮code</strong>，点击SSH：<br><img src="https://www.freeimg.cn/i/2024/03/17/65f654af556e9.png" alt="clone"></li>
+<li>把显示的代码拷贝下来(显示的代码一般为<a href="mailto:&#103;&#105;&#116;&#x40;&#103;&#x69;&#116;&#x68;&#x75;&#x62;&#x2e;&#x63;&#x6f;&#x6d;">&#103;&#105;&#116;&#x40;&#103;&#x69;&#116;&#x68;&#x75;&#x62;&#x2e;&#x63;&#x6f;&#x6d;</a>:你的用户名/仓库名称.git)，打开终端或git 终端，输入以下代码：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> [你拷贝下来的东西]</span><br></pre></td></tr></table></figure></li>
+<li>等待拷贝完成。</li>
+<li>在 clone 下来的文件夹内打开终端，输入以下指令切换回原生源<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> registry https://registry.npmjs.org</span><br></pre></td></tr></table></figure></li>
+<li>添加本地 npm 用户设置<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 仅第一次使用需要添加用户，之后会提示你输入你的npm账号密码以及注册邮箱</span></span><br><span class="line">npm adduser</span><br><span class="line"><span class="comment"># 非第一次使用直接登录即可，之后会提示你输入你的npm账号密码以及注册邮箱</span></span><br><span class="line">npm login</span><br></pre></td></tr></table></figure>
+运行npm初始化指令（npm init）<strong>注意，请确认你的包名没有和他人重复,可以在 npm 官网搜索相应包名，搜不到就说明还没被占用。</strong><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm init</span><br></pre></td></tr></table></figure></li>
+<li>接着按照指示填写：<br>运行后出现package name:填写你的包名</li>
+<li>version:填写(1.0.0)</li>
+<li>description:填写描述，不填也行</li>
+<li>entry point:默认</li>
+<li>test command:默认</li>
+<li>git repository:github图床仓库地址，不填也行</li>
+<li>keywords:关键字，不填也行</li>
+<li>author:作者</li>
+<li>license:默认<br>最后会输出一段package.json，然后会显示Is this OK？（yes）输入yes，结束。<br>最后输入发布指令，把包发布到npm上：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm publish</span><br></pre></td></tr></table></figure>
+<h3 id="如何访问图片"><a href="#如何访问图片" class="headerlink" title="如何访问图片"></a>如何访问图片</h3>例如：在仓库里新建一个image文件夹，里面放置图片，那么访问链接为：<br><a href="https://gcore.jsdelivr.net/npm/[%E5%8C%85%E5%90%8D]/image/xxx.png">https://gcore.jsdelivr.net/npm/[包名]/image/xxx.png</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Hexo</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
       </tags>
   </entry>
 </search>
